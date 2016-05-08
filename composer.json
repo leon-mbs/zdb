@@ -2,7 +2,7 @@
     "name": "leon-mbs/zdb",
     "description": "Библиотека для работы  с БД",
     "keywords": [  "database", "php" ],
-    "homepage": "http://zippy.com.ua/Zippy-framework/database",
+     
 
     "license": "MIT",
    "minimum-stability" : "dev",
