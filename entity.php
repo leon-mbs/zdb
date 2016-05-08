@@ -140,7 +140,7 @@ abstract class Entity
      * @param mixed $count
      * @param mixed $offset
      */
-    public static function find($where = '', $orderbyfield = null, $orderbydir = null, $count = -1, $offset = -1)
+    public static function find($where = '', $orderbyfield = null,   $count = -1, $offset = -1)
     {
 
         $class = get_called_class();
@@ -156,9 +156,7 @@ abstract class Entity
 
         if (strlen($orderbyfield) > 0) {
             $sql .= " order by " . $orderbyfield;
-            if (strlen($orderbydir) > 0) {
-                $sql .= " " . $orderbydir;
-            }
+ 
         }
 
         if ($offset >= 0 or $count >= 0) {
@@ -202,9 +200,9 @@ abstract class Entity
      * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset         */
-    public static function findArray($fieldname, $where = '', $orderbyfield = null, $orderbydir = null, $count = -1, $offset = -1)
+    public static function findArray($fieldname, $where = '', $orderbyfield = null,   $count = -1, $offset = -1)
     {
-        $entitylist = self::find($where, $orderbyfield, $orderbydir, $count, $offset);
+        $entitylist = self::find($where, $orderbyfield,   $count, $offset);
 
         $list = array();
         foreach ($entitylist as $key => $value) {
@@ -221,7 +219,7 @@ abstract class Entity
      */
     public static function findOne($where = "")
     {
-        $list = self::find($where, $orderbyfield, $orderbydir);
+        $list = self::find($where);
 
         if (count($list) == 0) {
             return null;
@@ -239,9 +237,9 @@ abstract class Entity
      * Возвращает  первую  строку  из набора
      * @param mixed $where
      */
-    public static function getFirst($where = "",$orderbyfield = null, $orderbydir = null)
+    public static function getFirst($where = "",$orderbyfield = null )
     {
-        $list = self::find($where, $orderbyfield, $orderbydir,1);
+        $list = self::find($where, $orderbyfield ,1);
 
         if (count($list) == 0) {
             return null;
