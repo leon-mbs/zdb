@@ -1,0 +1,25 @@
+{
+    "name": "leon-mbs/zippy",
+    "description": "Компонентный событийно-ориентированный PHP фреймворк",
+    "keywords": [  "framework", "php" ],
+    "homepage": "http://zippy.com.ua/Zippy-framework/opisanie",
+
+    "license": "MIT",
+   "minimum-stability" : "dev",
+   "prefer-stable" : true,
+    "type": "library",
+    "require": {
+         "php": ">=5.3.3",
+         "adodb/adodb-php": "v5.20.3"
+    },
+
+     "authors": [
+        {
+            "name": "Леонид Мартынюк",
+            "email": "leon.mbs@gmail.com"
+        }
+    ],
+    "autoload" : {
+        "files" : ["entity.php","db.php"]
+    }
+}
