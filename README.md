@@ -40,3 +40,4 @@
 
       DB::config($host, $dbname, $user, $pass,$driver);
 
+ Детально  в [документации](https://github.com/leon-mbs/zdb/blob/master/docs.md)
