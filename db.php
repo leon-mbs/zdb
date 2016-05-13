@@ -1,17 +1,16 @@
 <?php
 
-namespace ZDB\DB;
+namespace ZDB ;
 
 /**
  * Синглетон  инкапсулирующий   конект  к  БД
- * @todo  транзакции
  */
 class DB
 {
 
-    private $conn = null;
     private static $db = null, $driver = null;
     private static $dbhost, $dbname, $dbuser, $dbpassword;
+    private $conn = null;
 
     private function __construct()
     {
@@ -25,10 +24,11 @@ class DB
      * @param mixed $dbname
      * @param mixed $dbuser
      * @param mixed $dbpassword
+     * @param string $driver
      */
     public static function config($dbhost, $dbname, $dbuser, $dbpassword, $driver = "mysqli")
     {
-        global  $ADODB_FETCH_MODE,$ADODB_QUOTE_FIELDNAMES;
+        global $ADODB_FETCH_MODE, $ADODB_QUOTE_FIELDNAMES;
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
         $ADODB_QUOTE_FIELDNAMES = true;
 
@@ -37,18 +37,6 @@ class DB
         self::$dbuser = $dbuser;
         self::$dbpassword = $dbpassword;
         self::$driver = $driver;
-    }
-
-    /**
-     * Возвращает  инстанс
-     *
-     */
-    public static function getDB()
-    {
-        if (self::$db == null) {
-            self::$db = new DB();
-        }
-        return self::$db;
     }
 
     /**
@@ -64,15 +52,15 @@ class DB
     }
 
     /**
-     * Закрывает  конект  к  БД
+     * Возвращает  инстанс
      *
      */
-    public static function Close()
+    public static function getDB()
     {
-        $db = DB::getDB();
-        if ($db->conn instanceof \ADOConnection) {
-            $db->conn->Close();
+        if (self::$db == null) {
+            self::$db = new DB();
         }
+        return self::$db;
     }
 
     private function open()
@@ -84,6 +72,18 @@ class DB
         $this->conn->Connect(self::$dbhost, self::$dbuser, self::$dbpassword, self::$dbname);
         $this->conn->Execute("SET NAMES 'utf8'");
 
+    }
+
+    /**
+     * Закрывает  конект  к  БД
+     *
+     */
+    public static function Close()
+    {
+        $db = DB::getDB();
+        if ($db->conn instanceof \ADOConnection) {
+            $db->conn->Close();
+        }
     }
 
 }

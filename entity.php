@@ -1,6 +1,6 @@
 <?php
 
-namespace ZDB\DB;
+namespace ZDB ;
 
 /**
  * Базовый  класс  для  бизнес-сущностей
@@ -16,7 +16,7 @@ abstract class Entity
     /**
      * Конструктор
      *
-     * @param mixed $row  массив инициализирующий некторые
+     * @param mixed $row массив инициализирующий некторые
      * или  все  поля объекта
      *
      */
@@ -37,285 +37,6 @@ abstract class Entity
     {
         $meta = $this->getMetadata();
         $this->{$meta['keyfield']} = 0;
-    }
-
-    /**
-     * Устанавливает  значение поля
-     *
-     * @param mixed $name
-     * @param mixed $value
-     */
-    public final function __set($name, $value)
-    {
-        $this->fields[$name] = $value;
-    }
-
-    /**
-     * Возвращает  значение  поля
-     *
-     * @param mixed $name
-     * @return mixed
-     */
-    public final function __get($name)
-    {
-        return $this->fields[$name];
-    }
-
-    /**
-     * Возвращает поля сущности  в  виде  ассоциативного  массива
-     *
-     */
-    public final function getData()
-    {
-        return $this->fields;
-    }
-
-    /**
-     * Возвращает значение  уникального  ключа  сущности
-     *
-     */
-    public final function getKeyValue()
-    {
-        $meta = $this->getMetadata();
-        return $this->fields[$meta['keyfield']];
-    }
-
-    /**
-     * Возвращает  сущность  из  БД по  ключу
-     * @param mixed $param
-     */
-    public static function load($param)
-    {
-
-        $class = get_called_class();
-
-        $meta = $class::getMetadata();
-        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
-        $conn = DB::getConnect();
-        if (is_numeric($param)) {
-            $row = $conn->GetRow("select * from {$table}  where {$meta['keyfield']} = " . $param);
-        } else
-        if (is_array($param)) {
-            $row = $param;
-        }
-
-        if (count($row) == 0) {
-            return false;
-        }
-        $obj = new $class();
-        $obj->fields = array_merge($obj->fields, $row);
-        $obj->afterLoad();
-        return $obj;
-    }
-
-    /**
-     * Возвращает  количество  сущностй  в  БД  по  критерию
-     *
-     * @param mixed $where
-     */
-    public static function findCnt($where = "")
-    {
-        $class = get_called_class();
-        $meta = $class::getMetadata();
-        $conn = DB::getConnect();
-        $list = array();
-        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
-        $sql = "select coalesce(count({$meta['keyfield']}),0) as  cnt from " . $table;
-
-
-        if (strlen($where) > 0) {
-            $sql .= " where " . $where;
-        }
-
-
-        return $conn->getOne($sql);
-    }
-
-    /**
-     * Возвращает  массив  сущностей  из  БД  по  критерию
-     *
-     * @param mixed $where   Условие  для предиката where
-     * @param mixed $orderbyfield
-     * @param mixed $orderbydir
-     * @param mixed $count
-     * @param mixed $offset
-     */
-    public static function find($where = '', $orderbyfield = null,   $count = -1, $offset = -1)
-    {
-
-        $class = get_called_class();
-        $meta = $class::getMetadata();
-        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
-        $conn = DB::getConnect();
-        $list = array();
-        $sql = "select * from " . $table;
-
-        if (strlen($where) > 0) {
-            $sql .= " where " . $where;
-        }
-
-        if (strlen($orderbyfield) > 0) {
-            $sql .= " order by " . $orderbyfield;
- 
-        }
-
-        if ($offset >= 0 or $count >= 0) {
-            $rs = $conn->SelectLimit($sql, $count, $offset);
-        } else {
-            $rs = $conn->Execute($sql);
-        }
-
-        foreach ($rs as $row) {
-            $list[$row[$meta['keyfield']]] = new $class($row);
-            $list[$row[$meta['keyfield']]]->afterLoad();
-        }
-        return $list;
-    }
-
-    public static function findBySql($sql)
-    {
-
-        $class = get_called_class();
-        $meta = $class::getMetadata();
-        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
-        $conn = DB::getConnect();
-        $list = array();
-
-        $rs = $conn->Execute($sql);
-
-        foreach ($rs as $row) {
-            $list[$row[$meta['keyfield']]] = new $class($row);
-            $list[$row[$meta['keyfield']]]->afterLoad();
-        }
-        return $list;
-    }
-
-    /**
-     * Возвращает  массив ключ/имя  из  БД  по  критерию
-     * Может  использоватся  для заполнения выпадающих списков
-     *
-     * @param string $fieldname   Имя  поля представляющее имя сущности.
-     * @param mixed $where   Условие  для предиката where
-     * @param mixed $orderbyfield
-     * @param mixed $orderbydir
-     * @param mixed $count
-     * @param mixed $offset         */
-    public static function findArray($fieldname, $where = '', $orderbyfield = null,   $count = -1, $offset = -1)
-    {
-        $entitylist = self::find($where, $orderbyfield,   $count, $offset);
-
-        $list = array();
-        foreach ($entitylist as $key => $value) {
-            $list[$key] = $value->{$fieldname};
-        }
-
-        return $list;
-    }
-
-    /**
-     * Возвращает  одну  строку  из набора
-     * строки  должны  быть  уникальны
-     * @param mixed $where
-     */
-    public static function findOne($where = "")
-    {
-        $list = self::find($where);
-
-        if (count($list) == 0) {
-            return null;
-        }
-        if (count($list) == 1) {
-
-            return  array_pop($list);
-        }
-        if (count($list) > 1) {
-            throw new ZDBException("Метод findOne вернул  больше  одной  записи. Условие: [{$where}]");
-        }
-    }
-
-    /**
-     * Возвращает  первую  строку  из набора
-     * @param mixed $where
-     */
-    public static function getFirst($where = "",$orderbyfield = null )
-    {
-        $list = self::find($where, $orderbyfield ,1);
-
-        if (count($list) == 0) {
-            return null;
-        }
-
-        return  array_pop($list);
-
-
-    }
-
-
-
-    /**
-     * Сохраняет  сущность  в  БД
-     * Если  сущность новая создает запись
-     *
-     */
-    public function save()
-    {
-
-        if ($this->beforeSave() === false) {
-            return;
-        };
-        $conn = DB::getConnect();
-        $meta = $this->getMetadata();
-        if ($this->fields[$meta['keyfield']] > 0) {
-            $conn->AutoExecute($meta['table'], $this->fields, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
-            $this->afterSave(true);
-        } else {
-            $conn->AutoExecute($meta['table'], $this->fields, "INSERT");
-            $this->fields[$meta['keyfield']] = $conn->Insert_ID();
-            $this->afterSave(false);
-        }
-    }
-
-    /**
-     * Удаление  сущности
-     * возвращает  false  если   удаление неудачно  или  не  разрешено
-     * @param mixed $id Может быть  числом (ключевое поле),  экземпляром  Entity или  срокой с  условием  для  where
-     */
-    public static function delete($id)
-    {
-        $class = get_called_class();
-        $meta = $class::getMetadata();
-
-        if (is_numeric($id)) {
-
-            $obj = $class::load($id);
-        } else {
-            $obj = $id;
-            $id = @$obj->{$meta['keyfield']};
-        }
-        $alowdelete = true;
-        if ($obj instanceof Entity) {
-            $alowdelete = $obj->beforeDelete();
-            if ($alowdelete === false) {
-                throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                //return false;
-            }
-
-            $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
-        } else {   //если  строка
-            $arr = $class::find($id);
-            foreach ($arr as $obj) {
-                $alowdelete = $obj->beforeDelete();
-                if ($alowdelete === false) {
-                    throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                    //return false;
-                }
-            }
-            $sql = "delete from {$meta['table']}  where " . $id;
-        }
-
-        $conn = DB::getConnect();
-        $conn->Execute($sql);
-        return true;
     }
 
     /**
@@ -353,8 +74,329 @@ abstract class Entity
         }
 
 
-
         throw new ZDBException('getMetadata должен  быть  перегружен');
+    }
+
+    /**
+     * Возвращает  сущность  из  БД по  ключу
+     * @param mixed $param
+     */
+    public static function load($param)
+    {
+        $row  = array();
+        $class = get_called_class();
+
+        $meta = $class::getMetadata();
+        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
+        $conn = DB::getConnect();
+        if (is_numeric($param)) {
+            $row = $conn->GetRow("select * from {$table}  where {$meta['keyfield']} = " . $param);
+        } else
+            if (is_array($param)) {
+                $row = $param;
+            }
+
+        if (count($row) == 0) {
+            return false;
+        }
+        $obj = new $class();
+        $obj->fields = array_merge($obj->fields, $row);
+        $obj->afterLoad();
+        return $obj;
+    }
+
+    /**
+     * Возвращает  количество  сущностй  в  БД  по  критерию
+     *
+     * @param mixed $where
+     */
+    public static function findCnt($where = "")
+    {
+        $class = get_called_class();
+        $meta = $class::getMetadata();
+        $conn = DB::getConnect();
+
+        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
+        $sql = "select coalesce(count({$meta['keyfield']}),0) as  cnt from " . $table;
+
+
+        if (strlen($where) > 0) {
+            $sql .= " where " . $where;
+        }
+
+
+        return $conn->getOne($sql);
+    }
+
+    public static function findBySql($sql)
+    {
+
+        $class = get_called_class();
+        $meta = $class::getMetadata();
+        //$table = isset($meta['view']) ? $meta['view'] : $meta['table'];
+        $conn = DB::getConnect();
+        $list = array();
+
+        $rs = $conn->Execute($sql);
+
+        foreach ($rs as $row) {
+            $list[$row[$meta['keyfield']]] = new $class($row);
+            $list[$row[$meta['keyfield']]]->afterLoad();
+        }
+        return $list;
+    }
+
+    /**
+     * Возвращает  массив ключ/имя  из  БД  по  критерию
+     * Может  использоватся  для заполнения выпадающих списков
+     *
+     * @param string $fieldname Имя  поля представляющее имя сущности.
+     * @param mixed $where Условие  для предиката where
+     * @param mixed $orderbyfield
+     * @param mixed $orderbydir
+     * @param mixed $count
+     * @param mixed $offset
+     */
+    public static function findArray($fieldname, $where = '', $orderbyfield = null, $count = -1, $offset = -1)
+    {
+        $entitylist = self::find($where, $orderbyfield, $count, $offset);
+
+        $list = array();
+        foreach ($entitylist as $key => $value) {
+            $list[$key] = $value->{$fieldname};
+        }
+
+        return $list;
+    }
+
+    /**
+     * Возвращает  массив  сущностей  из  БД  по  критерию
+     *
+     * @param mixed $where Условие  для предиката where
+     * @param mixed $orderbyfield
+     * @param mixed $orderbydir
+     * @param mixed $count
+     * @param mixed $offset
+     */
+    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1)
+    {
+
+        $class = get_called_class();
+        $meta = $class::getMetadata();
+        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
+        $conn = DB::getConnect();
+        $list = array();
+        $sql = "select * from " . $table;
+
+        if (strlen($where) > 0) {
+            $sql .= " where " . $where;
+        }
+
+        if (strlen(trim($orderbyfield)) > 0) {
+            $sql .= " order by " . $orderbyfield;
+
+        }
+
+        if ($offset >= 0 or $count >= 0) {
+            $rs = $conn->SelectLimit($sql, $count, $offset);
+        } else {
+            $rs = $conn->Execute($sql);
+        }
+
+        foreach ($rs as $row) {
+            $list[$row[$meta['keyfield']]] = new $class($row);
+            $list[$row[$meta['keyfield']]]->afterLoad();
+        }
+        return $list;
+    }
+
+    /**
+     * Возвращает  одну  строку  из набора
+     * строки  должны  быть  уникальны
+     * @param mixed $where
+     */
+    public static function findOne($where = "")
+    {
+        $list = self::find($where);
+
+        if (count($list) == 0) {
+            return null;
+        }
+        if (count($list) == 1) {
+
+            return array_pop($list);
+        }
+        if (count($list) > 1) {
+            throw new ZDBException("Метод findOne вернул  больше  одной  записи. Условие: [{$where}]");
+        }
+        return null;
+    }
+
+    /**
+     * Возвращает  первую  строку  из набора
+     * @param mixed $where
+     */
+    public static function getFirst($where = "", $orderbyfield = null)
+    {
+        $list = self::find($where, $orderbyfield, 1);
+
+        if (count($list) == 0) {
+            return null;
+        }
+
+        return array_pop($list);
+
+
+    }
+
+    /**
+     * Удаление  сущности
+     * возвращает  false  если   удаление неудачно  или  не  разрешено
+     * @param mixed $id Может быть  числом (ключевое поле),  экземпляром  Entity или  срокой с  условием  для  where
+     */
+    public static function delete($id)
+    {
+        $class = get_called_class();
+        $meta = $class::getMetadata();
+
+        if (is_numeric($id)) {
+
+            $obj = $class::load($id);
+        } else {
+            $obj = $id;
+            $id = @$obj->{$meta['keyfield']};
+        }
+        //$alowdelete = true;
+        if ($obj instanceof Entity) {
+            $alowdelete = $obj->beforeDelete();
+            if ($alowdelete === false) {
+                throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
+                //return false;
+            }
+
+            $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
+        } else {   //если  строка
+            $arr = $class::find($id);
+            foreach ($arr as $obj) {
+                $alowdelete = $obj->beforeDelete();
+                if ($alowdelete === false) {
+                    throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
+                    //return false;
+                }
+            }
+            $sql = "delete from {$meta['table']}  where " . $id;
+        }
+
+        $conn = DB::getConnect();
+        $conn->Execute($sql);
+        return true;
+    }
+
+    /**
+     * Выщывается перед  удалением  сущности
+     * если  возвращает  false  удаление  отеняется
+     *
+     */
+    protected function beforeDelete()
+    {
+        return true;
+    }
+
+    /**
+     * Обработка строки  перед вставкой   в  запрос
+     * после  обработки  строка  не  требует кавычек
+     * @param mixed $str
+     */
+    public static function qstr($str)
+    {
+        $conn = DB::getConnect();
+        return $conn->qstr($str);
+    }
+
+    /**
+     * Добавление  слешей  в строку
+     *
+     * @param mixed $str
+     */
+    public static function escape($str)
+    {
+        $conn = DB::getConnect();
+        return mysqli_real_escape_string($conn->_connectionID, $str);
+    }
+
+    /**
+     * Форматирование  даты в   сответствии  с  SQL  диалектом
+     *
+     * @param mixed $dt Timestamp
+     */
+    public static function dbdate($dt)
+    {
+        $conn = DB::getConnect();
+        return $conn->DBDate($dt);
+    }
+
+    /**
+     * Возвращает  значение  поля
+     *
+     * @param mixed $name
+     * @return mixed
+     */
+    public final function __get($name)
+    {
+        return $this->fields[$name];
+    }
+
+    /**
+     * Устанавливает  значение поля
+     *
+     * @param mixed $name
+     * @param mixed $value
+     */
+    public final function __set($name, $value)
+    {
+        $this->fields[$name] = $value;
+    }
+
+    /**
+     * Возвращает поля сущности  в  виде  ассоциативного  массива
+     *
+     */
+    public final function getData()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * Возвращает значение  уникального  ключа  сущности
+     *
+     */
+    public final function getKeyValue()
+    {
+        $meta = $this->getMetadata();
+        return $this->fields[$meta['keyfield']];
+    }
+
+    /**
+     * Сохраняет  сущность  в  БД
+     * Если  сущность новая создает запись
+     *
+     */
+    public function save()
+    {
+
+        if ($this->beforeSave() === false) {
+            return;
+        };
+        $conn = DB::getConnect();
+        $meta = $this->getMetadata();
+        if ($this->fields[$meta['keyfield']] > 0) {
+            $conn->AutoExecute($meta['table'], $this->fields, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
+            $this->afterSave(true);
+        } else {
+            $conn->AutoExecute($meta['table'], $this->fields, "INSERT");
+            $this->fields[$meta['keyfield']] = $conn->Insert_ID();
+            $this->afterSave(false);
+        }
     }
 
     /**
@@ -385,49 +427,8 @@ abstract class Entity
     {
 
     }
-
-    /**
-     * Выщывается перед  удалением  сущности
-     * если  возвращает  false  удаление  отеняется
-     *
-     */
-    protected function beforeDelete()
-    {
-        return true;
-    }
-
-    /**
-     * Обработка строки  перед вставкой   в  запрос
-     * после  обработки  строка  не  требует кавычек
-     * @param mixed $str
-     */
-    public static function qstr($str)
-    {
-        $conn = DB::getConnect();
-        return $conn->qstr($str);
-    }
-
-
-    /**
-    * Добавление  слешей  в строку
-    *
-    * @param mixed $str
-    */
-    public static function escape($str)
-    {
-        $conn = DB::getConnect();
-        return mysqli_real_escape_string($conn->_connectionID, $str);
-    }
-
-    /**
-    * Форматирование  даты в   сответствии  с  SQL  диалектом
-    *
-    * @param mixed $dt   Timestamp
-    */
-    public static function dbdate($dt)
-    {
-        $conn = DB::getConnect();
-        return $conn->DBDate( $dt);
-    }
 }
-    class ZDBException extends \Exception {}
+
+class ZDBException extends \Exception
+{
+}
