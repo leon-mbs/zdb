@@ -35,7 +35,6 @@
  
         $thesameuser = User::load($user->user_id);
         echo $thesameuser ->username;
-Если  выборки  производятся  из  представления тогда  указываем, например @view=viewusers
 
 Предварительно  нужно  указать параметры  конекта к ADODB
 
