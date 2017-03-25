@@ -259,9 +259,12 @@ abstract class Entity
         $class = get_called_class();
         $meta = $class::getMetadata();
 
-        if (is_numeric($id)) {
+        if ($id>0) {
 
             $obj = $class::load($id);
+            if($obj == null){
+                return;
+            }
         } else {
             $obj = $id;
             $id = @$obj->{$meta['keyfield']};
@@ -284,7 +287,7 @@ abstract class Entity
                     //return false;
                 }
             }
-            $sql = "delete from {$meta['table']}  where " . $id;
+            $sql = "delete from {$meta['table']}  where {$meta['keyfield']}=" . $id;
         }
 
         $conn = DB::getConnect();
