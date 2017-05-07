@@ -258,26 +258,33 @@ abstract class Entity
     {
         $class = get_called_class();
         $meta = $class::getMetadata();
-
-        if ($id>0) {
+        $conn = DB::getConnect();
+        
+        if ($id >0) {
 
             $obj = $class::load($id);
-            if($obj == null){
-                return;
-            }
-        } else {
-            $obj = $id;
-            $id = @$obj->{$meta['keyfield']};
-        }
-        //$alowdelete = true;
-        if ($obj instanceof Entity) {
-            $alowdelete = $obj->beforeDelete();
+            if ($obj instanceof Entity) {
+                $alowdelete = $obj->beforeDelete();
+                if ($alowdelete === false) {
+                    throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
+                    //return false;
+                }
+
+                $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
+                $conn->Execute($sql);
+            } 
+            return true;               
+        }  
+    
+        if ($id instanceof Entity) {
+            $alowdelete = $id->beforeDelete();
             if ($alowdelete === false) {
                 throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
                 //return false;
             }
 
             $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
+            $conn->Execute($sql);
         } else {   //если  строка
             $arr = $class::find($id);
             foreach ($arr as $obj) {
@@ -286,12 +293,16 @@ abstract class Entity
                     throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
                     //return false;
                 }
-            }
-            $sql = "delete from {$meta['table']}  where {$meta['keyfield']}=" . $id;
+            } 
+            if(is_array($arr) && count($arr) >0) {
+                $sql = "delete from {$meta['table']}  where " . $id;
+                $conn->Execute($sql);
+
+            }  
         }
 
-        $conn = DB::getConnect();
-        $conn->Execute($sql);
+        
+        
         return true;
     }
 
