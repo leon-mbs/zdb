@@ -97,7 +97,7 @@ abstract class Entity
             }
 
         if (count($row) == 0) {
-            return false;
+            return null;
         }
         $obj = new $class();
         $obj->fields = array_merge($obj->fields, $row);
@@ -258,33 +258,23 @@ abstract class Entity
     {
         $class = get_called_class();
         $meta = $class::getMetadata();
-        $conn = DB::getConnect();
-        
-        if ($id >0) {
+
+        if (is_numeric($id)) {
 
             $obj = $class::load($id);
-            if ($obj instanceof Entity) {
-                $alowdelete = $obj->beforeDelete();
-                if ($alowdelete === false) {
-                    throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                    //return false;
-                }
-
-                $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
-                $conn->Execute($sql);
-            } 
-            return true;               
-        }  
-    
-        if ($id instanceof Entity) {
-            $alowdelete = $id->beforeDelete();
+        } else {
+            $obj = $id;
+            $id = @$obj->{$meta['keyfield']};
+        }
+        //$alowdelete = true;
+        if ($obj instanceof Entity) {
+            $alowdelete = $obj->beforeDelete();
             if ($alowdelete === false) {
                 throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
                 //return false;
             }
 
             $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
-            $conn->Execute($sql);
         } else {   //если  строка
             $arr = $class::find($id);
             foreach ($arr as $obj) {
@@ -293,16 +283,12 @@ abstract class Entity
                     throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
                     //return false;
                 }
-            } 
-            if(is_array($arr) && count($arr) >0) {
-                $sql = "delete from {$meta['table']}  where " . $id;
-                $conn->Execute($sql);
-
-            }  
+            }
+            $sql = "delete from {$meta['table']}  where " . $id;
         }
 
-        
-        
+        $conn = DB::getConnect();
+        $conn->Execute($sql);
         return true;
     }
 
