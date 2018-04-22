@@ -252,44 +252,32 @@ abstract class Entity
     /**
      * Удаление  сущности
      * возвращает  false  если   удаление неудачно  или  не  разрешено
-     * @param mixed $id Может быть  числом (ключевое поле),  экземпляром  Entity или  срокой с  условием  для  where
+     * @param mixed $id Уникальный ключ
      */
     public static function delete($id)
     {
         $class = get_called_class();
         $meta = $class::getMetadata();
 
-        if (is_numeric($id)) {
+        if ($id>0) {
 
             $obj = $class::load($id);
-        } else {
-            $obj = $id;
-            $id = @$obj->{$meta['keyfield']};
-        }
-        //$alowdelete = true;
+        } 
+        
         if ($obj instanceof Entity) {
             $alowdelete = $obj->beforeDelete();
             if ($alowdelete === false) {
-                throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                //return false;
+               // throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
+                 return false;
             }
 
             $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
-        } else {   //если  строка
-            $arr = $class::find($id);
-            foreach ($arr as $obj) {
-                $alowdelete = $obj->beforeDelete();
-                if ($alowdelete === false) {
-                    throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                    //return false;
-                }
-            }
-            $sql = "delete from {$meta['table']}  where " . $id;
-        }
+            $conn = DB::getConnect();
+            $conn->Execute($sql);
+            return true;
+        } 
 
-        $conn = DB::getConnect();
-        $conn->Execute($sql);
-        return true;
+        
     }
 
     /**
