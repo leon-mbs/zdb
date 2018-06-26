@@ -188,7 +188,7 @@ abstract class Entity
         $list = array();
         $sql = "select * from " . $table;
 
-        if (strlen($where) > 0) {
+        if (strlen(trim($where)) > 0) {
             $sql .= " where " . $where;
         }
 
