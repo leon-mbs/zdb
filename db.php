@@ -47,7 +47,7 @@ class DB
     {
         $db = DB::getDB();
         $db->open();
-        //$db->conn->debug = true;
+     
         return $db->conn;
     }
 
@@ -70,7 +70,9 @@ class DB
         }
         $this->conn = \ADONewConnection(self::$driver);
         $this->conn->Connect(self::$dbhost, self::$dbuser, self::$dbpassword, self::$dbname);
-        $this->conn->Execute("SET NAMES 'utf8'");
+        if(DB::$driver == "mysqli"){
+            $this->conn->Execute("SET NAMES 'utf8'");
+        }
 
     }
 
