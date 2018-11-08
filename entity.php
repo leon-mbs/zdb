@@ -407,11 +407,14 @@ abstract class Entity
         };
         $conn = DB::getConnect();
         $meta = $this->getMetadata();
+        $flist=$this->fields ;
+        unset($flist[$meta['keyfield']] );//убираем  ключевое  поле с  запроса        
         if ($this->fields[$meta['keyfield']] > 0) {
-            $conn->AutoExecute($meta['table'], $this->fields, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
+
+            $conn->AutoExecute($meta['table'], $flist, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
             $this->afterSave(true);
         } else {
-            $conn->AutoExecute($meta['table'], $this->fields, "INSERT");
+            $conn->AutoExecute($meta['table'], $flist, "INSERT");
             $this->fields[$meta['keyfield']] = $conn->Insert_ID();
             $this->afterSave(false);
         }
