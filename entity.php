@@ -281,7 +281,7 @@ abstract class Entity
 
     /**
      * Удаление  сущности
-     * возвращает  false  если   удаление неудачно  или  не  разрешено
+     * возвращает  строку с ошибкой  если   удаление неудачно  или  не  разрешено
      * @param mixed $id Уникальный ключ
      */
     public static function delete($id)
@@ -295,16 +295,17 @@ abstract class Entity
         } 
         
         if ($obj instanceof Entity) {
-            $alowdelete = $obj->beforeDelete();
-            if ($alowdelete === false) {
-               // throw new ZDBException("Объект '{$meta['table']}' ({$id}) не может быть удален");
-                 return false;
+            $allowdelete = $obj->beforeDelete();
+            if (strlen($allowdelete)>0) {
+               
+                 return $allowdelete;
             }
 
             $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
             $conn = DB::getConnect();
             $conn->Execute($sql);
-            return true;
+            $obj->afterDelete();
+            return "";
         } 
 
         
@@ -312,14 +313,27 @@ abstract class Entity
 
     /**
      * Вызывается перед  удалением  сущности
-     * если  возвращает  false  удаление  отеняется
+     * если  возвращает  строку с ошибкой удаление отменяется
      *
      */
     protected function beforeDelete()
     {
-        return true;
+        return "";
     }
 
+    
+   /**
+   * Вызывается после  удаления 
+   *  
+   */
+    protected function afterDelete()
+    {
+         
+    }
+
+ 
+    
+    
     /**
      * Обработка строки  перед вставкой   в  запрос
      * после  обработки  строка  не  требует кавычек
