@@ -100,7 +100,8 @@ abstract class Entity
             return null;
         }
         $obj = new $class();
-        $obj->fields = array_merge($obj->fields, $row);
+        
+        $obj->setData($row);
         $obj->afterLoad();
         return $obj;
     }
@@ -209,7 +210,9 @@ abstract class Entity
         }
 
         foreach ($rs as $row) {
-            $list[$row[$meta['keyfield']]] = new $class($row);
+            $item = new $class();
+            $item->setData($row);
+            $list[$row[$meta['keyfield']]] = $item;
             $list[$row[$meta['keyfield']]]->afterLoad();
         }
         return $list;
