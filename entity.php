@@ -143,7 +143,9 @@ abstract class Entity
         $rs = $conn->Execute($sql);
 
         foreach ($rs as $row) {
-            $list[$row[$meta['keyfield']]] = new $class($row);
+            $item = new $class();
+            $item->setData($row);
+            $list[$row[$meta['keyfield']]] = $item;
             $list[$row[$meta['keyfield']]]->afterLoad();
         }
         return $list;
@@ -396,6 +398,17 @@ abstract class Entity
     public final function getData()
     {
         return $this->fields;
+    }
+    /**
+     * записывает данные  в сущность
+     *
+     */
+    public final function setData($row)
+    {
+        if (is_array($row)) {
+            $this->fields = array_merge($this->fields, $row);
+        }
+
     }
 
     /**
