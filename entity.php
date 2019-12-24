@@ -480,6 +480,6 @@ abstract class Entity
     }
 }
 
-class ZDBException extends \Exception
+class ZDBException extends \Error
 {
 }
