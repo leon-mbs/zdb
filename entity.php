@@ -120,7 +120,14 @@ abstract class Entity
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $sql = "select coalesce(count({$meta['keyfield']}),0) as  cnt from " . $table;
 
-
+        $cnst = static::getConstraint();
+        if(strlen($cnst)  >0){
+            if(strlen($where)==0){
+               $where =  $cnst;
+            }else {
+               $where = "({$cnst}) and ({$where}) "; 
+            }
+        }
         if (strlen($where) > 0) {
             $sql .= " where " . $where;
         }
@@ -193,6 +200,16 @@ abstract class Entity
         $conn = DB::getConnect();
         $list = array();
         $sql = "select * from " . $table;
+      
+        $cnst = static::getConstraint();
+        if(strlen($cnst)  >0){
+            if(strlen($where)==0){
+               $where =  $cnst;
+            }else {
+              $where = "({$cnst}) and ({$where}) "; 
+ 
+            }
+        }
 
         if (strlen(trim($where)) > 0) {
             $sql .= " where " . $where;
@@ -255,6 +272,15 @@ abstract class Entity
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $sql = "select {$field} from " . $table;
 
+        $cnst = static::getConstraint();
+        if(strlen($cnst)  >0){
+            if(strlen($where)==0){
+               $where =  $cnst;
+            }else {
+              $where = "({$cnst}) and ({$where}) "; 
+ 
+            }
+        }
 
         if (strlen($where) > 0) {
             $sql .= " where " . $where;
@@ -276,8 +302,8 @@ abstract class Entity
         if (count($list) == 0) {
             return null;
         }
-        if ($unique ==true &&  count($list) > 1) {
-            throw new ZDBException("Метод getFirst нащел  больше  одной  записи. Условие: [{$where}]");
+        if ($unique == true &&  count($list) > 1) {
+            throw new ZDBException("Метод getFirst нашел  больше  одной  записи. Условие: [{$where}]");
         }
         return array_pop($list);
 
@@ -478,6 +504,17 @@ abstract class Entity
     {
 
     }
+    
+  /**
+  * возвращает  ограничение на выборку  на  уровне  бизнес-сущности.
+  * например  если  в  системе  нужно ограничить возвращаемый  набор для всех  выборок
+  * перегружается в  класе  сущности и возвращает инструкцию для where
+  */
+  protected static function getConstraint(){
+      return '';
+  }
+     
+ 
 }
 
 class ZDBException extends \Error
