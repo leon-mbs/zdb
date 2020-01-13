@@ -83,6 +83,7 @@ abstract class Entity
      */
     public static function load($param)
     {
+        if(strlen($param)==0) return null;
         $row  = array();
         $class = get_called_class();
 
