@@ -236,28 +236,7 @@ abstract class Entity
         return $list;
     }
 
-    /**
-     * Возвращает  одну  строку  из набора
-     * строки  должны  быть  уникальны
-     * @param mixed $where
-     * @deprecated  использовать   getFirst с параметром  unique=true
-     */
-    public static function findOne($where = "")
-    {
-        $list = self::find($where);
-
-        if (count($list) == 0) {
-            return null;
-        }
-        if (count($list) == 1) {
-
-            return array_pop($list);
-        }
-        if (count($list) > 1) {
-            throw new ZDBException("Метод findOne вернул  больше  одной  записи. Условие: [{$where}]");
-        }
-        return null;
-    }
+    
     
     /**
      * Возвращает  одно скалярное  значение  из одной строки
