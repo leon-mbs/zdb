@@ -215,10 +215,11 @@ abstract class Entity
         if (strlen(trim($where)) > 0) {
             $sql .= " where " . $where;
         }
-
-        if (strlen(trim($orderbyfield)) > 0) {
+        $orderbyfield = trim($orderbyfield) ;
+        if(trim($orderbyfield)=='asc')  $orderbyfield='';
+        if(trim($orderbyfield)=='desc')  $orderbyfield='';
+        if (strlen($orderbyfield) > 0) {
             $sql .= " order by " . $orderbyfield;
-
         }
 
         if ($offset >= 0 or $count >= 0) {
