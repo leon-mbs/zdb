@@ -200,7 +200,7 @@ abstract class Entity
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
         $list = array();
-        $sql = "select STRAIGHT_JOIN * from " . $table;
+        $sql = "select   * from " . $table;
       
         $cnst = static::getConstraint();
         if(strlen($cnst)  >0){
