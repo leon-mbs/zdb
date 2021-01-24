@@ -2,7 +2,7 @@
     "name": "leon-mbs/zdb",
     "description": "Библиотека для работы  с БД",
     "keywords": [  "database", "php" ],
-     
+    "homepage": "https://zippy.com.ua/zdb",   
 
     "license": "MIT",
    "minimum-stability" : "dev",
@@ -15,8 +15,8 @@
 
      "authors": [
         {
-            "name": "Леонид Мартынюк",
-            "email": "leon.mbs@gmail.com"
+            "name": "Леонид Мартынюк" 
+      
         }
     ],
     "autoload" : {

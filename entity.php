@@ -191,16 +191,18 @@ abstract class Entity
      * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей 
      */
-    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1)
+    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1,$fields='')
     {
-
+        if(strlen($fields)==0) $fields ="*";
+ 
         $class = get_called_class();
         $meta = $class::getMetadata();
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
         $list = array();
-        $sql = "select   * from " . $table;
+        $sql = "select {$fields} from " . $table;
       
         $cnst = static::getConstraint();
         if(strlen($cnst)  >0){

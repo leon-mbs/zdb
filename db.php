@@ -72,6 +72,7 @@ class DB
         $this->conn->Connect(self::$dbhost, self::$dbuser, self::$dbpassword, self::$dbname);
         if(DB::$driver == "mysqli"){
             $this->conn->Execute("SET NAMES 'utf8'");
+            $this->conn->Execute("SET SQL_BIG_SELECTS=1");
         }
 
     }
