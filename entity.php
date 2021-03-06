@@ -173,13 +173,45 @@ abstract class Entity
      */
     public static function findArray($fieldname, $where = '', $orderbyfield = null, $count = -1, $offset = -1)
     {
-        $entitylist = self::find($where, $orderbyfield, $count, $offset);
-
-        $list = array();
-        foreach ($entitylist as $key => $value) {
-            $list[$key] = $value->{$fieldname};
+  
+        $class = get_called_class();
+        $meta = $class::getMetadata();
+        $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
+        $conn = DB::getConnect();
+        
+        $sql = "select {$meta['keyfield']} ,{$fieldname} from " . $table;
+      
+        $cnst = static::getConstraint();
+        if(strlen($cnst)  >0){
+            if(strlen($where)==0){
+               $where =  $cnst;
+            }else {
+              $where = "({$cnst}) and ({$where}) "; 
+ 
+            }
         }
 
+        if (strlen(trim($where)) > 0) {
+            $sql .= " where " . $where;
+        }
+        $orderbyfield = trim($orderbyfield) ;
+        if(trim($orderbyfield)=='asc')  $orderbyfield='';
+        if(trim($orderbyfield)=='desc')  $orderbyfield='';
+        if (strlen($orderbyfield) > 0) {
+            $sql .= " order by " . $orderbyfield;
+        }
+
+        if ($offset >= 0 or $count >= 0) {
+            $rs = $conn->SelectLimit($sql, $count, $offset);
+        } else {
+            $rs = $conn->Execute($sql);
+        }
+        $list = array();
+        foreach ($rs as $row) {
+         
+            $list[$row[$meta['keyfield']]] = $row[$fieldname];
+           
+        }
         return $list;
     }
 

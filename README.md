@@ -3,7 +3,10 @@
 ###### Библиотека  для  доступа   к БД
 
 Библиотека  представляет  собой, Active Record построеный 
-на  функциональности  библиотекаи [ADODB](http://adodb.org/dokuwiki/doku.php).
+на  функциональности  библиотеки [ADODB](http://adodb.org/dokuwiki/doku.php).
+
+Домашняя страница:  [https://zippy.com.ua/zdb](https://zippy.com.ua/zdb)
+
 
 Пример использования
 
@@ -36,7 +39,7 @@
         $thesameuser = User::load($user->user_id);
         echo $thesameuser ->username;
 
-Предварительно  нужно  указать параметры  конекта к ADODB
+Предварительно  нужно  указать параметры  соединения к БД
 
       DB::config($host, $dbname, $user, $pass,$driver);
 
