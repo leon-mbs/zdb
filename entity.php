@@ -227,6 +227,8 @@ abstract class Entity
      */
     public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1,$fields='')
     {
+        if(strlen($count)==0) $count =-1;
+        if(strlen($offset)==0) $offset =-1;
         if(strlen($fields)==0) $fields ="*";
  
         $class = get_called_class();
