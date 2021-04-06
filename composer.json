@@ -10,7 +10,7 @@
     "type": "library",
     "require": {
          "php": ">=7.1.0",
-         "adodb/adodb-php": "5.20.18"
+         "adodb/adodb-php": "v5.21.0"
     },
 
      "authors": [

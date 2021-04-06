@@ -423,7 +423,7 @@ abstract class Entity
      */
     public final function __get($name)
     {
-        return $this->fields[$name];
+        return @$this->fields[$name];
     }
 
     /**
