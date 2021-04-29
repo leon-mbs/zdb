@@ -164,7 +164,7 @@ abstract class Entity
      * Возвращает  массив ключ/имя  из  БД  по  критерию
      * Может  использоватся  для заполнения выпадающих списков
      *
-     * @param string $fieldname Имя  поля представляющее имя сущности.
+     * @param string $fieldname Имя  поля представляющее имя сущности. 
      * @param mixed $where Условие  для предиката where
      * @param mixed $orderbyfield
      * @param mixed $orderbydir
@@ -178,8 +178,9 @@ abstract class Entity
         $meta = $class::getMetadata();
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
-        
-        $sql = "select {$meta['keyfield']} ,{$fieldname} from " . $table;
+ 
+          $sql = "select {$meta['keyfield']} ,{$fieldname} as _field_ from " . $table;
+     
       
         $cnst = static::getConstraint();
         if(strlen($cnst)  >0){
@@ -209,7 +210,7 @@ abstract class Entity
         $list = array();
         foreach ($rs as $row) {
          
-            $list[$row[$meta['keyfield']]] = $row[$fieldname];
+            $list[$row[$meta['keyfield']]] = $row['_field_'];
            
         }
         return $list;
@@ -227,8 +228,6 @@ abstract class Entity
      */
     public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1,$fields='')
     {
-        if(strlen($count)==0) $count =-1;
-        if(strlen($offset)==0) $offset =-1;
         if(strlen($fields)==0) $fields ="*";
  
         $class = get_called_class();
@@ -423,7 +422,7 @@ abstract class Entity
      */
     public final function __get($name)
     {
-        return @$this->fields[$name];
+        return $this->fields[$name];
     }
 
     /**
