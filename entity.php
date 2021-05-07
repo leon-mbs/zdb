@@ -164,7 +164,7 @@ abstract class Entity
      * Возвращает  массив ключ/имя  из  БД  по  критерию
      * Может  использоватся  для заполнения выпадающих списков
      *
-     * @param string $fieldname Имя  поля представляющее имя сущности. 
+     * @param string $fieldname Имя  поля представляющее поле сущности. Можно использовать  конкатенацию  полей.
      * @param mixed $where Условие  для предиката where
      * @param mixed $orderbyfield
      * @param mixed $orderbydir
@@ -224,7 +224,7 @@ abstract class Entity
      * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset
-     * @param mixed $fields  уточнение  списка  возвращаемых  полей 
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  * 
      */
     public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1,$fields='')
     {

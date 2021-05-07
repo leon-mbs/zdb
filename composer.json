@@ -8,9 +8,10 @@
    "minimum-stability" : "dev",
    "prefer-stable" : true,
     "type": "library",
+    "version": "1.2.15",
     "require": {
          "php": ">=7.1.0",
-         "adodb/adodb-php": "v5.21.0"
+         "adodb/adodb-php": "v5.20.18"
     },
 
      "authors": [
