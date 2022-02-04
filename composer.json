@@ -11,7 +11,7 @@
    
     "require": {
          "php": ">=7.1.0",
-         "adodb/adodb-php": "v5.21.1"
+         "adodb/adodb-php": "v5.21.4"
     },
 
      "authors": [
