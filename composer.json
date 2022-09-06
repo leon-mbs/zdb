@@ -10,16 +10,11 @@
     "type": "library",
    
     "require": {
-         "php": ">=7.1.0",
-         "adodb/adodb-php": "v5.21.4"
+         "php": ">=7.4.0",
+         "adodb/adodb-php": "v5.22.2"
     },
 
-     "authors": [
-        {
-            "name": "Леонид Мартынюк" 
-      
-        }
-    ],
+ 
     "autoload" : {
         "files" : ["entity.php","db.php"]
     }
