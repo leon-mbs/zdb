@@ -58,7 +58,7 @@ abstract class Entity
             $reg_arr = array_combine($arr[1], $arr[2]);
 
             $table = trim($reg_arr['table']);
-            $view = trim(@$reg_arr['view']);
+            $view = trim($reg_arr['view'] ?? '');
             $keyfield = trim($reg_arr['keyfield']);
 
 
@@ -422,7 +422,7 @@ abstract class Entity
      */
     public final function __get($name)
     {
-        return @$this->fields[$name];
+        return $this->fields[$name] ?? null;
     }
 
     /**
