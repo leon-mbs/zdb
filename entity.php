@@ -481,7 +481,7 @@ abstract class Entity
         $meta = $this->getMetadata();
         $flist=$this->fields ;
         unset($flist[$meta['keyfield']] );//убираем  ключевое  поле с  запроса        
-        if ($this->fields[$meta['keyfield']] > 0) {
+        if (($this->fields[$meta['keyfield']]?? 0) > 0) {
 
             $conn->AutoExecute($meta['table'], $flist, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
             $this->afterSave(true);
