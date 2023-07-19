@@ -279,7 +279,7 @@ abstract class Entity
      * Возвращает  одно скалярное  значение  из одной строки
      * @param mixed $field  возвращаемое  поле  или  выражение
      * @param mixed $where
-     */
+     */ 
     public static function getOne($field,$where = "")
     {
         $class = get_called_class();
@@ -305,23 +305,21 @@ abstract class Entity
 
 
         return $conn->getOne($sql);
-    }
+    }   
     /**
      * Возвращает  первую  строку  из набора
      * @param mixed $where
      * @param mixed $orderbyfield
      * @param mixed $unique  если  true должна быть  только одна запись
      */
-    public static function getFirst($where = "", $orderbyfield = null,$unique=false)
+    public static function getFirst($where = "", $orderbyfield = null,$fields='')
     {
-        $list = self::find($where, $orderbyfield, 1);
+        $list = self::find($where, $orderbyfield, 1,-1,$fields);
 
         if (count($list) == 0) {
             return null;
         }
-        if ($unique == true &&  count($list) > 1) {
-            throw new ZDBException("Метод getFirst нашел  больше  одной  записи. Условие: [{$where}]");
-        }
+    
         return array_pop($list);
 
 
