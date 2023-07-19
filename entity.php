@@ -80,8 +80,9 @@ abstract class Entity
     /**
      * Возвращает  сущность  из  БД по  ключу
      * @param mixed $param
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *       
      */
-    public static function load($param)
+    public static function load($param,$fields='*')
     {
         if(strlen($param)==0) return null;
         $row  = array();
@@ -91,7 +92,7 @@ abstract class Entity
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
         if (is_numeric($param)) {
-            $row = $conn->GetRow("select * from {$table}  where {$meta['keyfield']} = " . $param);
+            $row = $conn->GetRow("select  {$fields}  from {$table}  where {$meta['keyfield']} = " . $param);
         } else
             if (is_array($param)) {
                 $row = $param;
