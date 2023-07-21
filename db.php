@@ -7,13 +7,15 @@ namespace ZDB ;
  */
 class DB
 {
-
-    private static $db = null, $driver = null;
-    private static $dbhost, $dbname, $dbuser, $dbpassword;
+    private static $db = null;
+    private static $driver = null;
+    private static $dbhost;
+    private static $dbname;
+    private static $dbuser;
+    private static $dbpassword;
     private $conn = null;
 
-    private function __construct()
-    {
+    private function __construct() {
 
     }
 
@@ -26,8 +28,7 @@ class DB
      * @param mixed $dbpassword
      * @param string $driver
      */
-    public static function config($dbhost, $dbname, $dbuser, $dbpassword, $driver = "mysqli")
-    {
+    public static function config($dbhost, $dbname, $dbuser, $dbpassword, $driver = "mysqli") {
         global $ADODB_FETCH_MODE, $ADODB_QUOTE_FIELDNAMES;
         $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
         $ADODB_QUOTE_FIELDNAMES = true;
@@ -43,11 +44,10 @@ class DB
      * Открывает  конект  к  БД  и  возвращает  соотаветствующий  ресурс
      *
      */
-    public static function getConnect()
-    {
+    public static function getConnect() {
         $db = DB::getDB();
         $db->open();
-     
+
         return $db->conn;
     }
 
@@ -55,22 +55,20 @@ class DB
      * Возвращает  инстанс
      *
      */
-    public static function getDB()
-    {
+    public static function getDB() {
         if (self::$db == null) {
             self::$db = new DB();
         }
         return self::$db;
     }
 
-    private function open()
-    {
+    private function open() {
         if ($this->conn instanceof \ADOConnection) {
             return;
         }
         $this->conn = \ADONewConnection(self::$driver);
         $this->conn->Connect(self::$dbhost, self::$dbuser, self::$dbpassword, self::$dbname);
-        if(DB::$driver == "mysqli"){
+        if(DB::$driver == "mysqli") {
             $this->conn->Execute("SET NAMES 'utf8'");
             $this->conn->Execute("SET SQL_BIG_SELECTS=1");
         }
@@ -81,8 +79,7 @@ class DB
      * Закрывает  конект  к  БД
      *
      */
-    public static function Close()
-    {
+    public static function Close() {
         $db = DB::getDB();
         if ($db->conn instanceof \ADOConnection) {
             $db->conn->Close();

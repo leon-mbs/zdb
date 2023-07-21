@@ -9,8 +9,6 @@ namespace ZDB ;
  */
 abstract class Entity
 {
-
-
     protected $fields = array();  //список  полей
 
     /**
@@ -21,8 +19,7 @@ abstract class Entity
      *
      */
 
-    function __construct($row = null)
-    {
+    public function __construct($row = null) {
         $this->init();
         if (is_array($row)) {
             $this->fields = array_merge($this->fields, $row);
@@ -33,8 +30,7 @@ abstract class Entity
      * Инициализация полей  сущности
      *
      */
-    protected function init()
-    {
+    protected function init() {
         $meta = $this->getMetadata();
         $this->{$meta['keyfield']} = 0;
     }
@@ -49,8 +45,7 @@ abstract class Entity
      * Вместо  испоользования  метода   можно  импользоввать  аннтации  возде  определения  класса
      * анноации  именуются   аналогично  ключам  массива метаданных.
      */
-    protected static function getMetadata()
-    {
+    protected static function getMetadata() {
         $class = new \ReflectionClass(get_called_class());
         $doc = $class->getDocComment();
         preg_match_all('/@([a-z0-9_-]+)=([^\n]+)/is', $doc, $arr);
@@ -66,8 +61,9 @@ abstract class Entity
                 $retarr = array();
                 $retarr['table'] = $table;
                 $retarr['keyfield'] = $keyfield;
-                if (strlen($view) > 0)
+                if (strlen($view) > 0) {
                     $retarr['view'] = $view;
+                }
 
                 return $retarr;
             }
@@ -80,11 +76,12 @@ abstract class Entity
     /**
      * Возвращает  сущность  из  БД по  ключу
      * @param mixed $param
-     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *       
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
      */
-    public static function load($param,$fields='*')
-    {
-        if(strlen($param)==0) return null;
+    public static function load($param, $fields='*') {
+        if(strlen($param)==0) {
+            return null;
+        }
         $row  = array();
         $class = get_called_class();
 
@@ -93,16 +90,15 @@ abstract class Entity
         $conn = DB::getConnect();
         if (is_numeric($param)) {
             $row = $conn->GetRow("select  {$fields}  from {$table}  where {$meta['keyfield']} = " . $param);
-        } else
-            if (is_array($param)) {
-                $row = $param;
-            }
+        } elseif (is_array($param)) {
+            $row = $param;
+        }
 
         if (count($row) == 0) {
             return null;
         }
         $obj = new $class();
-        
+
         $obj->setData($row);
         $obj->afterLoad();
         return $obj;
@@ -113,8 +109,7 @@ abstract class Entity
      *
      * @param mixed $where
      */
-    public static function findCnt($where = "")
-    {
+    public static function findCnt($where = "") {
         $class = get_called_class();
         $meta = $class::getMetadata();
         $conn = DB::getConnect();
@@ -123,11 +118,11 @@ abstract class Entity
         $sql = "select coalesce(count({$meta['keyfield']}),0) as  cnt from " . $table;
 
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0){
-            if(strlen($where)==0){
-               $where =  $cnst;
-            }else {
-               $where = "({$cnst}) and ({$where}) "; 
+        if(strlen($cnst)  >0) {
+            if(strlen($where)==0) {
+                $where =  $cnst;
+            } else {
+                $where = "({$cnst}) and ({$where}) ";
             }
         }
         if (strlen($where) > 0) {
@@ -138,11 +133,10 @@ abstract class Entity
         return $conn->getOne($sql);
     }
 
-   
-    
-    
-    public static function findBySql($sql)
-    {
+
+
+
+    public static function findBySql($sql) {
 
         $class = get_called_class();
         $meta = $class::getMetadata();
@@ -172,24 +166,23 @@ abstract class Entity
      * @param mixed $count
      * @param mixed $offset
      */
-    public static function findArray($fieldname, $where = '', $orderbyfield = null, $count = -1, $offset = -1)
-    {
-  
+    public static function findArray($fieldname, $where = '', $orderbyfield = null, $count = -1, $offset = -1) {
+
         $class = get_called_class();
         $meta = $class::getMetadata();
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
- 
-          $sql = "select {$meta['keyfield']} ,{$fieldname} as _field_ from " . $table;
-     
-      
+
+        $sql = "select {$meta['keyfield']} ,{$fieldname} as _field_ from " . $table;
+
+
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0){
-            if(strlen($where)==0){
-               $where =  $cnst;
-            }else {
-              $where = "({$cnst}) and ({$where}) "; 
- 
+        if(strlen($cnst)  >0) {
+            if(strlen($where)==0) {
+                $where =  $cnst;
+            } else {
+                $where = "({$cnst}) and ({$where}) ";
+
             }
         }
 
@@ -197,8 +190,12 @@ abstract class Entity
             $sql .= " where " . $where;
         }
         $orderbyfield = trim($orderbyfield) ;
-        if(trim($orderbyfield)=='asc')  $orderbyfield='';
-        if(trim($orderbyfield)=='desc')  $orderbyfield='';
+        if(trim($orderbyfield)=='asc') {
+            $orderbyfield='';
+        }
+        if(trim($orderbyfield)=='desc') {
+            $orderbyfield='';
+        }
         if (strlen($orderbyfield) > 0) {
             $sql .= " order by " . $orderbyfield;
         }
@@ -210,9 +207,9 @@ abstract class Entity
         }
         $list = array();
         foreach ($rs as $row) {
-         
+
             $list[$row[$meta['keyfield']]] = $row['_field_'];
-           
+
         }
         return $list;
     }
@@ -225,26 +222,27 @@ abstract class Entity
      * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset
-     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  * 
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
      */
-    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1,$fields='')
-    {
-        if(strlen($fields)==0) $fields ="*";
- 
+    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') {
+        if(strlen($fields)==0) {
+            $fields ="*";
+        }
+
         $class = get_called_class();
         $meta = $class::getMetadata();
         $table = isset($meta['view']) ? $meta['view'] : $meta['table'];
         $conn = DB::getConnect();
         $list = array();
         $sql = "select {$fields} from " . $table;
-      
+
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0){
-            if(strlen($where)==0){
-               $where =  $cnst;
-            }else {
-              $where = "({$cnst}) and ({$where}) "; 
- 
+        if(strlen($cnst)  >0) {
+            if(strlen($where)==0) {
+                $where =  $cnst;
+            } else {
+                $where = "({$cnst}) and ({$where}) ";
+
             }
         }
 
@@ -252,8 +250,12 @@ abstract class Entity
             $sql .= " where " . $where;
         }
         $orderbyfield = trim($orderbyfield) ;
-        if(trim($orderbyfield)=='asc')  $orderbyfield='';
-        if(trim($orderbyfield)=='desc')  $orderbyfield='';
+        if(trim($orderbyfield)=='asc') {
+            $orderbyfield='';
+        }
+        if(trim($orderbyfield)=='desc') {
+            $orderbyfield='';
+        }
         if (strlen($orderbyfield) > 0) {
             $sql .= " order by " . $orderbyfield;
         }
@@ -273,15 +275,14 @@ abstract class Entity
         return $list;
     }
 
-    
-    
+
+
     /**
      * Возвращает  одно скалярное  значение  из одной строки
      * @param mixed $field  возвращаемое  поле  или  выражение
      * @param mixed $where
-     */ 
-    public static function getOne($field,$where = "")
-    {
+     */
+    public static function getOne($field, $where = "") {
         $class = get_called_class();
         $meta = $class::getMetadata();
         $conn = DB::getConnect();
@@ -290,12 +291,12 @@ abstract class Entity
         $sql = "select {$field} from " . $table;
 
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0){
-            if(strlen($where)==0){
-               $where =  $cnst;
-            }else {
-              $where = "({$cnst}) and ({$where}) "; 
- 
+        if(strlen($cnst)  >0) {
+            if(strlen($where)==0) {
+                $where =  $cnst;
+            } else {
+                $where = "({$cnst}) and ({$where}) ";
+
             }
         }
 
@@ -305,21 +306,20 @@ abstract class Entity
 
 
         return $conn->getOne($sql);
-    }   
+    }
     /**
      * Возвращает  первую  строку  из набора
      * @param mixed $where
      * @param mixed $orderbyfield
      * @param mixed $unique  если  true должна быть  только одна запись
      */
-    public static function getFirst($where = "", $orderbyfield = null,$fields='')
-    {
-        $list = self::find($where, $orderbyfield, 1,-1,$fields);
+    public static function getFirst($where = "", $orderbyfield = null, $fields='') {
+        $list = self::find($where, $orderbyfield, 1, -1, $fields);
 
         if (count($list) == 0) {
             return null;
         }
-    
+
         return array_pop($list);
 
 
@@ -330,21 +330,20 @@ abstract class Entity
      * возвращает  строку с ошибкой  если   удаление неудачно  или  не  разрешено
      * @param mixed $id Уникальный ключ
      */
-    public static function delete($id)
-    {
+    public static function delete($id) {
         $class = get_called_class();
         $meta = $class::getMetadata();
 
         if ($id>0) {
 
             $obj = $class::load($id);
-        } 
-        
+        }
+
         if ($obj instanceof Entity) {
             $allowdelete = $obj->beforeDelete();
             if (strlen($allowdelete)>0) {
-               
-                 return $allowdelete;
+
+                return $allowdelete;
             }
 
             $sql = "delete from {$meta['table']}  where {$meta['keyfield']} = " . $id;
@@ -352,9 +351,9 @@ abstract class Entity
             $conn->Execute($sql);
             $obj->afterDelete();
             return "";
-        } 
+        }
 
-        
+
     }
 
     /**
@@ -362,31 +361,28 @@ abstract class Entity
      * если  возвращает  строку с ошибкой удаление отменяется
      *
      */
-    protected function beforeDelete()
-    {
+    protected function beforeDelete() {
         return "";
     }
 
-    
-   /**
-   * Вызывается после  удаления 
-   *  
-   */
-    protected function afterDelete()
-    {
-         
+
+    /**
+    * Вызывается после  удаления
+    *
+    */
+    protected function afterDelete() {
+
     }
 
- 
-    
-    
+
+
+
     /**
      * Обработка строки  перед вставкой   в  запрос
      * после  обработки  строка  не  требует кавычек
      * @param mixed $str
      */
-    public static function qstr($str)
-    {
+    public static function qstr($str) {
         $conn = DB::getConnect();
         return $conn->qstr($str);
     }
@@ -396,8 +392,7 @@ abstract class Entity
      *
      * @param mixed $str
      */
-    public static function escape($str)
-    {
+    public static function escape($str) {
         $conn = DB::getConnect();
         return mysqli_real_escape_string($conn->_connectionID, $str);
     }
@@ -407,8 +402,7 @@ abstract class Entity
      *
      * @param mixed $dt Timestamp
      */
-    public static function dbdate($dt)
-    {
+    public static function dbdate($dt) {
         $conn = DB::getConnect();
         return $conn->DBDate($dt);
     }
@@ -419,8 +413,7 @@ abstract class Entity
      * @param mixed $name
      * @return mixed
      */
-    public final function __get($name)
-    {
+    final public function __get($name) {
         return $this->fields[$name] ?? null;
     }
 
@@ -430,8 +423,7 @@ abstract class Entity
      * @param mixed $name
      * @param mixed $value
      */
-    public final function __set($name, $value)
-    {
+    final public function __set($name, $value) {
         $this->fields[$name] = $value;
     }
 
@@ -439,16 +431,14 @@ abstract class Entity
      * Возвращает поля сущности  в  виде  ассоциативного  массива
      *
      */
-    public final function getData()
-    {
+    final public function getData() {
         return $this->fields;
     }
     /**
      * записывает данные  в сущность
      *
      */
-    public final function setData($row)
-    {
+    final public function setData($row) {
         if (is_array($row)) {
             $this->fields = array_merge($this->fields, $row);
         }
@@ -459,8 +449,7 @@ abstract class Entity
      * Возвращает значение  уникального  ключа  сущности
      *
      */
-    public final function getKeyValue()
-    {
+    final public function getKeyValue() {
         $meta = $this->getMetadata();
         return $this->fields[$meta['keyfield']];
     }
@@ -470,8 +459,7 @@ abstract class Entity
      * Если  сущность новая создает запись
      *
      */
-    public function save()
-    {
+    public function save() {
 
         if ($this->beforeSave() === false) {
             return;
@@ -479,7 +467,7 @@ abstract class Entity
         $conn = DB::getConnect();
         $meta = $this->getMetadata();
         $flist=$this->fields ;
-        unset($flist[$meta['keyfield']] );//убираем  ключевое  поле с  запроса        
+        unset($flist[$meta['keyfield']]);//убираем  ключевое  поле с  запроса
         if (($this->fields[$meta['keyfield']]?? 0) > 0) {
 
             $conn->AutoExecute($meta['table'], $flist, "UPDATE", "{$meta['keyfield']} = " . $this->fields[$meta['keyfield']]);
@@ -496,8 +484,7 @@ abstract class Entity
      * Если  возвращает  false  сохранение  отменяется
      *
      */
-    protected function beforeSave()
-    {
+    protected function beforeSave() {
         return true;
     }
 
@@ -506,8 +493,7 @@ abstract class Entity
      *
      * @param mixed $update - true  если обновление
      */
-    protected function afterSave($update)
-    {
+    protected function afterSave($update) {
 
     }
 
@@ -515,21 +501,20 @@ abstract class Entity
      * Вызывается   после  загрузки  сущности  из  БД
      *
      */
-    protected function afterLoad()
-    {
+    protected function afterLoad() {
 
     }
-    
-  /**
-  * возвращает  ограничение на выборку  на  уровне  бизнес-сущности.
-  * например  если  в  системе  нужно ограничить возвращаемый  набор для всех  выборок
-  * перегружается в  класе  сущности и возвращает инструкцию для where
-  */
-  protected static function getConstraint(){
-      return '';
-  }
-     
- 
+
+    /**
+    * возвращает  ограничение на выборку  на  уровне  бизнес-сущности.
+    * например  если  в  системе  нужно ограничить возвращаемый  набор для всех  выборок
+    * перегружается в  класе  сущности и возвращает инструкцию для where
+    */
+    protected static function getConstraint() {
+        return '';
+    }
+
+
 }
 
 class ZDBException extends \Error
