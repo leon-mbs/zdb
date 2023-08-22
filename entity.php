@@ -361,7 +361,7 @@ abstract class Entity
      * если  возвращает  строку с ошибкой удаление отменяется
      *
      */
-    protected function beforeDelete() {
+    protected function beforeDelete() { 
         return "";
     }
 
