@@ -214,6 +214,8 @@ abstract class Entity
         return $list;
     }
 
+
+
     /**
      * Возвращает  массив  сущностей  из  БД  по  критерию
      *
@@ -223,8 +225,30 @@ abstract class Entity
      * @param mixed $count
      * @param mixed $offset
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
+     * @return массив 
      */
     public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') {
+        $list = [];
+        
+        foreach( self::findEach($where , $orderbyfield , $count , $offset , $fields) as $k=>$v ){
+           $list[$k]=$v ;            
+        }
+        
+        return $list;
+    }       
+
+    /**
+     * Возвращает  массив  сущностей  из  БД  по  критерию
+     *
+     * @param mixed $where Условие  для предиката where
+     * @param mixed $orderbyfield
+     * @param mixed $orderbydir
+     * @param mixed $count
+     * @param mixed $offset
+     * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
+     * @return  итератор
+     */
+    public static function findEach($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') {
         if(strlen($fields)==0) {
             $fields ="*";
         }
@@ -275,7 +299,7 @@ abstract class Entity
         return $list;
     }
 
-
+  
 
     /**
      * Возвращает  одно скалярное  значение  из одной строки
