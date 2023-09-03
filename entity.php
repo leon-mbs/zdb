@@ -227,10 +227,10 @@ abstract class Entity
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
      * @return массив 
      */
-    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') {
+    public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') : array {
         $list = [];
         
-        foreach( self::findEach($where , $orderbyfield , $count , $offset , $fields) as $k=>$v ){
+        foreach( self::findYield($where , $orderbyfield , $count , $offset , $fields) as $k=>$v ){
            $list[$k]=$v ;            
         }
         
@@ -238,7 +238,7 @@ abstract class Entity
     }       
 
     /**
-     * Возвращает  массив  сущностей  из  БД  по  критерию
+     * Возвращает  итерируемый набор сущностей  из  БД  по  критерию
      *
      * @param mixed $where Условие  для предиката where
      * @param mixed $orderbyfield
@@ -248,7 +248,7 @@ abstract class Entity
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
      * @return  итератор
      */
-    public static function findEach($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') {
+    public static function findYield($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='')    {
         if(strlen($fields)==0) {
             $fields ="*";
         }
@@ -293,10 +293,11 @@ abstract class Entity
         foreach ($rs as $row) {
             $item = new $class();
             $item->setData($row);
-            $list[$row[$meta['keyfield']]] = $item;
-            $list[$row[$meta['keyfield']]]->afterLoad();
+            $item->afterLoad();
+            yield $row[$meta['keyfield']]  => $item;
+
         }
-        return $list;
+        
     }
 
   
