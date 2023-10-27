@@ -79,8 +79,13 @@ abstract class Entity
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
      */
     public static function load($param, $fields='*') {
-        if(strlen($param)==0) {
+        if($param ==null) {
             return null;
+        }
+        if(is_string($param )) {
+            if(strlen($param )==0) {
+                return null;
+            }
         }
         $row  = array();
         $class = get_called_class();
@@ -177,8 +182,8 @@ abstract class Entity
 
 
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0) {
-            if(strlen($where)==0) {
+        if(strlen($cnst ?? '')  >0) {
+            if(strlen($where ?? '')==0) {
                 $where =  $cnst;
             } else {
                 $where = "({$cnst}) and ({$where}) ";
@@ -186,10 +191,10 @@ abstract class Entity
             }
         }
 
-        if (strlen(trim($where)) > 0) {
+        if (strlen(trim($where ?? '')) > 0) {
             $sql .= " where " . $where;
         }
-        $orderbyfield = trim($orderbyfield) ;
+        $orderbyfield = trim($orderbyfield ?? '') ;
         if(trim($orderbyfield)=='asc') {
             $orderbyfield='';
         }
@@ -261,8 +266,8 @@ abstract class Entity
         $sql = "select {$fields} from " . $table;
 
         $cnst = static::getConstraint();
-        if(strlen($cnst)  >0) {
-            if(strlen($where)==0) {
+        if(strlen($cnst ?? '')  >0) {
+            if(strlen($where ?? '')==0) {
                 $where =  $cnst;
             } else {
                 $where = "({$cnst}) and ({$where}) ";
@@ -270,17 +275,17 @@ abstract class Entity
             }
         }
 
-        if (strlen(trim($where)) > 0) {
+        if (strlen(trim($where ?? '')) > 0) {
             $sql .= " where " . $where;
         }
-        $orderbyfield = trim($orderbyfield) ;
-        if(trim($orderbyfield)=='asc') {
+        $orderbyfield = trim($orderbyfield ?? '') ;
+        if(trim($orderbyfield ?? '')=='asc') {
             $orderbyfield='';
         }
-        if(trim($orderbyfield)=='desc') {
+        if(trim($orderbyfield ?? '')=='desc') {
             $orderbyfield='';
         }
-        if (strlen($orderbyfield) > 0) {
+        if (strlen($orderbyfield ?? '') > 0) {
             $sql .= " order by " . $orderbyfield;
         }
 
