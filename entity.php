@@ -21,9 +21,8 @@ abstract class Entity
 
     public function __construct($row = null) {
         $this->init();
-        if (is_array($row)) {
-            $this->fields = array_merge($this->fields, $row);
-        }
+        $this->setData($row);
+
     }
 
     /**
@@ -95,8 +94,8 @@ abstract class Entity
         $conn = DB::getConnect();
         if (is_numeric($param)) {
             $row = $conn->GetRow("select  {$fields}  from {$table}  where {$meta['keyfield']} = " . $param);
-        } elseif (is_array($param)) {
-            $row = $param;
+        } else  {
+            $row = $conn->GetRow("select  {$fields}  from {$table}  where {$meta['keyfield']} = " . $conn->qstr( $param) );  
         }
 
         if (count($row) == 0) {
@@ -105,7 +104,7 @@ abstract class Entity
         $obj = new $class();
 
         $obj->setData($row);
-        $obj->afterLoad();
+
         return $obj;
     }
 
@@ -298,7 +297,7 @@ abstract class Entity
         foreach ($rs as $row) {
             $item = new $class();
             $item->setData($row);
-            $item->afterLoad();
+
             yield $row[$meta['keyfield']]  => $item;
 
         }
@@ -471,6 +470,7 @@ abstract class Entity
     final public function setData($row) {
         if (is_array($row)) {
             $this->fields = array_merge($this->fields, $row);
+            $this->afterLoad();            
         }
 
     }
