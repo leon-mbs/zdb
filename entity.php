@@ -154,7 +154,7 @@ abstract class Entity
             $item = new $class();
             $item->setData($row);
             $list[$row[$meta['keyfield']]] = $item;
-            $list[$row[$meta['keyfield']]]->afterLoad();
+      //      $list[$row[$meta['keyfield']]]->afterLoad();
         }
         return $list;
     }
