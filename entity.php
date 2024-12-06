@@ -166,7 +166,6 @@ abstract class Entity
      * @param string $fieldname Имя  поля представляющее поле сущности. Можно использовать  конкатенацию  полей.
      * @param mixed $where Условие  для предиката where
      * @param mixed $orderbyfield
-     * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset
      */
@@ -229,7 +228,7 @@ abstract class Entity
      * @param mixed $count
      * @param mixed $offset
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
-     * @return массив 
+     * @return mixed массив 
      */
     public static function find($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='') : array {
         $list = [];
@@ -246,11 +245,10 @@ abstract class Entity
      *
      * @param mixed $where Условие  для предиката where
      * @param mixed $orderbyfield
-     * @param mixed $orderbydir
      * @param mixed $count
      * @param mixed $offset
      * @param mixed $fields  уточнение  списка  возвращаемых  полей По  умолчанию ставится  *
-     * @return  итератор
+     * @return mixed итератор
      */
     public static function findYield($where = '', $orderbyfield = null, $count = -1, $offset = -1, $fields='')    {
         if(strlen($fields)==0) {
@@ -278,13 +276,13 @@ abstract class Entity
             $sql .= " where " . $where;
         }
         $orderbyfield = trim($orderbyfield ?? '') ;
-        if(trim($orderbyfield ?? '')=='asc') {
+        if(trim($orderbyfield  )=='asc') {
             $orderbyfield='';
         }
-        if(trim($orderbyfield ?? '')=='desc') {
+        if(trim($orderbyfield  )=='desc') {
             $orderbyfield='';
         }
-        if (strlen($orderbyfield ?? '') > 0) {
+        if (strlen($orderbyfield  ) > 0) {
             $sql .= " order by " . $orderbyfield;
         }
 
@@ -340,7 +338,7 @@ abstract class Entity
      * Возвращает  первую  строку  из набора
      * @param mixed $where
      * @param mixed $orderbyfield
-     * @param mixed $unique  если  true должна быть  только одна запись
+     * @param mixed $fields  перечень  полей
      */
     public static function getFirst($where = "", $orderbyfield = null, $fields='') {
         $list = self::find($where, $orderbyfield, 1, -1, $fields);
@@ -362,7 +360,7 @@ abstract class Entity
     public static function delete($id) {
         $class = get_called_class();
         $meta = $class::getMetadata();
-
+        $obj= null;
         if ($id>0) {
 
             $obj = $class::load($id);
