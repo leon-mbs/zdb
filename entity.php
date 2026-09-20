@@ -363,10 +363,7 @@ abstract class Entity
         $class = get_called_class();
         $meta = $class::getMetadata();
 
-        if ($id>0) {
-
-            $obj = $class::load($id);
-        }
+        $obj = ($id > 0) ? $class::load($id) : null;
 
         if ($obj instanceof Entity) {
             $allowdelete = $obj->beforeDelete();
@@ -423,7 +420,8 @@ abstract class Entity
      */
     public static function escape($str) {
         $conn = DB::getConnect();
-        return mysqli_real_escape_string($conn->_connectionID, $str);
+        // addq  экранирует  строку  средствами  активного  драйвера  ADOdb  (переносимо)
+        return $conn->addq($str);
     }
 
     /**
