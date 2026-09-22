@@ -413,7 +413,7 @@ abstract class Entity
      */
     public static function qstr($str) {
         $conn = DB::getConnect();
-        return $conn->qstr($str);
+        return $conn->qStr($str);
     }
 
     /**
